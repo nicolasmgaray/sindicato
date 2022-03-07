@@ -1,5 +1,5 @@
 import fc from "fast-check";
-import { rle } from "../src/main";
+import { rle, RunLengthEncodedString } from "../src/main";
 
 // sanity check that tests work
 test("adds 1 + 2 to equal 3", () => {
@@ -47,3 +47,20 @@ it("sum is commutative", () => {
 
   fc.assert(commutativity, { verbose: true });
 });
+
+test("decoded data should be the same as the original data", () => {
+  fc.assert(
+      fc.property(fc.string(), originalData => {
+        const encodedString = rle(originalData);
+        const decodedString = _decodeRle(encodedString);
+
+        expect(originalData).toEqual(decodedString);
+      })
+  );
+});
+
+// Utility function for use with property-based testing
+const _decodeRle = (encodedString: RunLengthEncodedString): string => encodedString.reduce((decodedString, currentPair) => {
+  return decodedString += currentPair[0].repeat(currentPair[1]);
+}, '');
+
